@@ -1,0 +1,148 @@
+basePath: /
+definitions:
+  handlers.CreateAccountRequest:
+    properties:
+      document_number:
+        example: "12345678900"
+        type: string
+    type: object
+  handlers.CreateAccountResponse:
+    properties:
+      account_id:
+        example: 1
+        type: integer
+      document_number:
+        example: "12345678900"
+        type: string
+    type: object
+  handlers.CreateTransactionRequest:
+    properties:
+      account_id:
+        example: 1
+        type: integer
+      amount:
+        example: 123.45
+        type: number
+      operation_type_id:
+        example: 1
+        type: integer
+    type: object
+  handlers.CreateTransactionResponse:
+    properties:
+      account_id:
+        type: integer
+      amount:
+        type: number
+      event_date:
+        type: string
+      operation_type_id:
+        type: integer
+      transaction_id:
+        type: integer
+    type: object
+  handlers.ErrorResponse:
+    properties:
+      error:
+        example: record not found
+        type: string
+    type: object
+  handlers.GetAccountResponse:
+    properties:
+      account_id:
+        example: 1
+        type: integer
+      balance:
+        example: 0
+        type: number
+      document_number:
+        example: "12345678900"
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Accounts and transactions (SQLite, Gin, GORM).
+  title: Pismo API
+  version: "1.0"
+paths:
+  /accounts:
+    post:
+      consumes:
+      - application/json
+      description: 'POST body: document_number'
+      parameters:
+      - description: Document number
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CreateAccountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Create account
+      tags:
+      - accounts
+  /accounts/{accountId}:
+    get:
+      description: Balance in rupees
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GetAccountResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get account
+      tags:
+      - accounts
+  /transactions:
+    post:
+      consumes:
+      - application/json
+      description: Types 1–3 debit full amount, 4 credit. Type 2 is stored as installment
+        purchase and debited like type 1 (full amount).
+      parameters:
+      - description: Transaction payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CreateTransactionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Create transaction
+      tags:
+      - transactions
+swagger: "2.0"
